@@ -1,0 +1,11 @@
+node_modules
+.build
+test
+**/*.d.ts
+.idea
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+coverage
+dist

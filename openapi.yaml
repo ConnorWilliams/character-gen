@@ -1,0 +1,344 @@
+openapi: 3.0.0
+info:
+  title: Character Generator
+  description: 'An API to generate and interact with any character you can imagine!'
+  version: 0.0.1
+servers:
+  - url: https://
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas: {}
+paths:
+  /chat:
+    get:
+      summary: Get all chats
+      description: Get all chats
+      tags:
+        - chat
+      security:
+        - bearerAuth: []
+      parameters: []
+      responses:
+        '200':
+          description: Success!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                      description: ''
+                    created_at:
+                      type: number
+                      format: timestamptz
+                      description: ''
+                      default: now
+                    initial_prompt:
+                      type: string
+                      description: >-
+                        The initial prompt sent to ChatGPT for this characters
+                        conversation
+                    character_name:
+                      type: string
+                      description: ''
+                    user_id:
+                      type: integer
+                      format: int64
+                      description: ''
+                    messages:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            description: Name of who sent the message
+                          timestamp:
+                            type: number
+                            format: timestamptz
+                            description: ''
+                          text:
+                            type: string
+                            description: ''
+        '400':
+          description: Input Error. Check the request payload for issues.
+        '403':
+          description: >-
+            Access denied. Additional priviledges are needed access the
+            requested resource.
+        '404':
+          description: Not Found. The requested resource does not exist.
+        '429':
+          description: Rate Limited. Too many requests.
+        '500':
+          description: Unexpected error
+    post:
+      summary: Start a chat with your new friend
+      description: Start a chat with your new friend
+      tags:
+        - chat
+      security:
+        - bearerAuth: []
+      parameters: []
+      responses:
+        '200':
+          description: Success!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  text:
+                    type: string
+                  chatId:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        description: ''
+                      created_at:
+                        type: number
+                        format: timestamptz
+                        description: ''
+                        default: now
+                      initial_prompt:
+                        type: string
+                        description: >-
+                          The initial prompt sent to ChatGPT for this characters
+                          conversation
+                      character_name:
+                        type: string
+                        description: ''
+                      user_id:
+                        type: integer
+                        format: int64
+                        description: ''
+                      messages:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              description: Name of who sent the message
+                            timestamp:
+                              type: number
+                              format: timestamptz
+                              description: ''
+                            text:
+                              type: string
+                              description: ''
+        '400':
+          description: Input Error. Check the request payload for issues.
+        '403':
+          description: >-
+            Access denied. Additional priviledges are needed access the
+            requested resource.
+        '404':
+          description: Not Found. The requested resource does not exist.
+        '429':
+          description: Rate Limited. Too many requests.
+        '500':
+          description: Unexpected error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: ''
+                life_goal:
+                  type: string
+                  description: ''
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: ''
+                life_oal:
+                  type: string
+                  description: ''
+  /chat/{chat_id}:
+    get:
+      summary: Get a chat and its messages
+      description: Get all information for a chat
+      tags:
+        - chat
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: chat_id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Success!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        description: ''
+                      created_at:
+                        type: number
+                        format: timestamptz
+                        description: ''
+                        default: now
+                      initial_prompt:
+                        type: string
+                        description: >-
+                          The initial prompt sent to ChatGPT for this characters
+                          conversation
+                      character_name:
+                        type: string
+                        description: ''
+                      user_id:
+                        type: integer
+                        format: int64
+                        description: ''
+                      messages:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              description: Name of who sent the message
+                            timestamp:
+                              type: number
+                              format: timestamptz
+                              description: ''
+                            text:
+                              type: string
+                              description: ''
+        '400':
+          description: Input Error. Check the request payload for issues.
+        '403':
+          description: >-
+            Access denied. Additional priviledges are needed access the
+            requested resource.
+        '404':
+          description: Not Found. The requested resource does not exist.
+        '429':
+          description: Rate Limited. Too many requests.
+        '500':
+          description: Unexpected error
+    post:
+      summary: Reply to your AI friend
+      description: |-
+        Reply to your AI friend
+        <br /><br />
+        <b>Authentication:</b> required
+      tags:
+        - chat
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: chat_id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Success!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ai_message:
+                    type: string
+                  human_message:
+                    type: string
+        '400':
+          description: Input Error. Check the request payload for issues.
+        '403':
+          description: >-
+            Access denied. Additional priviledges are needed access the
+            requested resource.
+        '404':
+          description: Not Found. The requested resource does not exist.
+        '429':
+          description: Rate Limited. Too many requests.
+        '500':
+          description: Unexpected error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  description: ''
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  description: ''
+    delete:
+      summary: Delete a chat
+      description: |-
+        Delete a chat
+        <br /><br />
+        <b>Authentication:</b> required
+      tags:
+        - chat
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: chat_id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Success!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          description: Input Error. Check the request payload for issues.
+        '403':
+          description: >-
+            Access denied. Additional priviledges are needed access the
+            requested resource.
+        '404':
+          description: Not Found. The requested resource does not exist.
+        '429':
+          description: Rate Limited. Too many requests.
+        '500':
+          description: Unexpected error

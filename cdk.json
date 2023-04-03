@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/charactergen-api.ts",
+  "app": "npx ts-node --prefer-ts-exts cdk/charactergen-api.ts",
   "watch": {
     "include": [
       "**"
