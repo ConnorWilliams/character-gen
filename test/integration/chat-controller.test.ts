@@ -21,6 +21,9 @@ describe("chat controller", () => {
       } as any);
       console.log(getChatsResponse);
       expect(getChatsResponse.statusCode).toEqual(200);
+      expect(JSON.parse(getChatsResponse.body)).toEqual({
+        chats: "[]",
+      });
     });
   });
 });

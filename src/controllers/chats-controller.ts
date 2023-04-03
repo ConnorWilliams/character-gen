@@ -14,10 +14,10 @@ export class ChatsController {
     event: APIGatewayProxyWithCognitoAuthorizerEvent
   ): Promise<APIGatewayProxyResult> {
     try {
-      await this.chatService.getChats(
+      const chats = await this.chatService.getChats(
         event.requestContext.authorizer.claims.sub
       );
-      return formatResponse(200, {});
+      return formatResponse(200, { chats: JSON.stringify(chats) });
     } catch (error) {
       if (error instanceof Error) {
         Log.error(`Could not get chats.`, error);
