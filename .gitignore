@@ -1,8 +1,20 @@
-*.js
+src/**/*.js
+cdk/**/*.js
+packages/**/*.js
+# Output dir
+packages/**/*/dist/
+!.eslintrc.js
 !jest.config.js
 *.d.ts
 node_modules
+.idea
+.vscode
+*.iml
 
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+coverage
+dist
+.npmrc
+.envrc
