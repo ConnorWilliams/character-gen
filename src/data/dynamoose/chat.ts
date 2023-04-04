@@ -1,18 +1,13 @@
 import { Item } from "dynamoose/dist/Item";
 import { Schema } from "dynamoose";
-
-export class MessageItem extends Item {
-  name: string;
-  timestamp: string;
-  text: string;
-}
+import { Message } from "../dto";
 
 export class ChatItem extends Item {
   chatId: string;
   userId: string;
   character: CharacterItem;
   initialPrompt: string;
-  messages: Array<MessageItem>;
+  messages: Array<Message>;
   createdAt: string;
 }
 
@@ -74,7 +69,10 @@ export const characterSchema = new Schema(
       map: "characterId",
     },
     name: String,
-    numberOfConversations: Number,
+    numberOfConversations: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: {

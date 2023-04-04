@@ -11,6 +11,7 @@ export enum APIError {
   INTERNAL_ERROR = "internal_error",
   INVALID_REQUEST = "invalid_request",
   CONFLICT = "conflict",
+  NOT_FOUND = "not_found",
 }
 
 export enum SigningError {
@@ -20,6 +21,7 @@ export enum SigningError {
 export const CANNOT_PROCESS_ERROR = "Cannot process request.";
 export const AUTHENTICATION_FAILED_ERROR = "Client authentication failed.";
 export const INVALID_REQUEST_ERROR = "Invalid request.";
+export const NOT_FOUND_ERROR = "Resource not found.";
 
 export const internalServerError = (): APIGatewayProxyResult =>
   formatResponse(500, {
@@ -45,4 +47,10 @@ export const invalidSignature = (): APIGatewayProxyResult =>
   formatResponse(400, {
     error: SigningError.SIGNATURE,
     error_description: CANNOT_PROCESS_ERROR,
+  });
+
+export const notFound = (): APIGatewayProxyResult =>
+  formatResponse(404, {
+    error: APIError.NOT_FOUND,
+    error_description: NOT_FOUND_ERROR,
   });
