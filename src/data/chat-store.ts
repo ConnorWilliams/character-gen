@@ -6,8 +6,7 @@ import * as dynamoose from "dynamoose";
 import { DYNAMOOSE_DEFAULT_OPTIONS } from "../utils/dynamoose";
 import { narrowOrThrow } from "../utils/narrow-or-throw";
 import { Message } from "./dto";
-import { v4 as uuidv4 } from 'uuid';
-
+import { v4 as uuidv4 } from "uuid";
 
 export class ChatStore {
   private readonly model: Model<ChatItem>;
@@ -63,7 +62,7 @@ export class ChatStore {
       return await this.model.create({
         userId: userId,
         chatId: `chat#${uuidv4()}`,
-        // character: character, TODO: add character to chat
+        character: character,
         initialPrompt: "",
         messages: [],
       });

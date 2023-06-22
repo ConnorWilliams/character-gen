@@ -6,7 +6,7 @@ import * as dynamoose from "dynamoose";
 import { DYNAMOOSE_DEFAULT_OPTIONS } from "../utils/dynamoose";
 import { narrowOrThrow } from "../utils/narrow-or-throw";
 import { Character } from "./dto";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 export class CharacterStore {
   private readonly model: Model<CharacterItem>;

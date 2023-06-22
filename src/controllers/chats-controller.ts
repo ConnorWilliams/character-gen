@@ -3,7 +3,11 @@ import {
   APIGatewayProxyResult,
 } from "aws-lambda";
 import { ChatService } from "../services/chat-service";
-import { internalServerError, invalidRequest, notFound } from "../utils/api-errors";
+import {
+  internalServerError,
+  invalidRequest,
+  notFound,
+} from "../utils/api-errors";
 import { formatResponse } from "../utils/format-response";
 import { Log } from "../utils/logger";
 import { decodeNotThrow } from "../utils/decode";

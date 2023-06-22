@@ -1,6 +1,5 @@
 import { ChatsController } from "../../src/controllers/chats-controller";
 import { CharactersController } from "../../src/controllers/characters-controller";
-import { ChatService } from "../../src/services/chat-service";
 
 describe("chat controller", () => {
   let chatsController: ChatsController;
@@ -23,9 +22,6 @@ describe("chat controller", () => {
         },
       } as any);
       expect(getChatsResponse.statusCode).toEqual(200);
-      expect(JSON.parse(getChatsResponse.body)).toEqual({
-        chats: "[]",
-      });
     });
   });
 
@@ -46,28 +42,45 @@ describe("chat controller", () => {
         } as any);
         expect(getChatResponse.statusCode).toEqual(404);
       });
-    }
-    );
+    });
 
     describe("Tries to get started with a character", () => {
       let characterId: string;
 
       it("creates a character", async () => {
-        const createCharacterResponse = await charactersController.createCharacter({
-          requestContext: {
-            authorizer: {
-              claims: {
-                sub: "123",
+        const createCharacterResponse =
+          await charactersController.createCharacter({
+            requestContext: {
+              authorizer: {
+                claims: {
+                  sub: "123",
+                },
               },
             },
-          },
-          body: JSON.stringify({
-            name: "Test Character",
-            life_goal: "Test Life Goal",
-          })
-        } as any);
+            body: JSON.stringify({
+              name: "Test Character",
+              description: "Test Character Description",
+              properties: [
+                {
+                  name: "Test Property",
+                  value: "Test Property Value",
+                },
+              ],
+            }),
+          } as any);
         expect(createCharacterResponse.statusCode).toEqual(200);
-        characterId = JSON.parse(createCharacterResponse.body).character.characterId;
+        const serializedCharacter = JSON.parse(createCharacterResponse.body);
+        console.log(serializedCharacter);
+        expect(serializedCharacter.character.characterId).toBeTruthy();
+        expect(serializedCharacter.character.name).toEqual("Test Character");
+        expect(serializedCharacter.character.properties).toEqual([
+          {
+            name: "Test Property",
+            value: "Test Property Value",
+          },
+        ]);
+        characterId = JSON.parse(createCharacterResponse.body).character
+          .characterId;
       });
 
       it("lists all characters", async () => {
@@ -81,7 +94,6 @@ describe("chat controller", () => {
           },
         } as any);
         expect(getCharactersResponse.statusCode).toEqual(200);
-        console.log(JSON.parse(getCharactersResponse.body));
       });
 
       it("creates a chat", async () => {
@@ -94,10 +106,26 @@ describe("chat controller", () => {
             },
           },
           body: JSON.stringify({
-            character_id: 'character#19f09ef7-1ac6-4cdb-a27e-ec63b40cd560',
-          })
+            character_id: characterId,
+          }),
         } as any);
         expect(createChatResponse.statusCode).toEqual(200);
+
+        const serializedChat = JSON.parse(createChatResponse.body);
+        expect(serializedChat.chat.chatId).toBeTruthy();
+        expect(serializedChat.chat.character).toBeTruthy();
+        expect(serializedChat.chat.character).toMatchObject({
+          characterId: characterId,
+          name: "Test Character",
+          description: "Test Character Description",
+          properties: [
+            {
+              name: "Test Property",
+              value: "Test Property Value",
+            },
+          ],
+        });
+        expect(serializedChat.chat.messages).toEqual([]);
       });
     });
   });

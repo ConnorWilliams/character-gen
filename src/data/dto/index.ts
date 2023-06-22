@@ -23,8 +23,14 @@ export const SendMessageInput = iots.type({
 });
 export type SendMessageInput = iots.TypeOf<typeof SendMessageInput>;
 
+const CharacterProperty = iots.type({
+  name: iots.string,
+  value: iots.string,
+});
+
 export const CreateCharacterInput = iots.type({
   name: iots.string,
-  life_goal: iots.string,
+  description: iots.string,
+  properties: iots.array(CharacterProperty),
 });
 export type CreateCharacterInput = iots.TypeOf<typeof CreateCharacterInput>;
