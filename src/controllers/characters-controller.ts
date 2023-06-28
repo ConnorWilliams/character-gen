@@ -23,7 +23,7 @@ export class CharactersController {
       const characters = await this.characterService.getCharacters(
         event.requestContext.authorizer.claims.sub
       );
-      return formatResponse(200, { characters: JSON.stringify(characters) });
+      return formatResponse(200, characters);
     } catch (error) {
       if (error instanceof Error) {
         Log.error(`Could not get characters.`, error);

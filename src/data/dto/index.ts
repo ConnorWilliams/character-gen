@@ -15,15 +15,15 @@ export type CharacterProperty = iots.TypeOf<typeof CharacterProperty>;
 
 export const RequiredCharacterProperties = ["life_goal"];
 
-export const Character = iots.strict({
+export const Character = iots.type({
   characterId: iots.string,
   userId: iots.string,
   name: iots.string,
   description: iots.string,
   properties: iots.array(CharacterProperty),
   numberOfConversations: iots.number,
-  created_at: iots.string,
-  updated_at: iots.string,
+  createdAt: iots.string,
+  updatedAt: iots.string,
 });
 export type Character = iots.TypeOf<typeof Character>;
 

@@ -47,6 +47,17 @@ export const chatSchema = new Schema(
   }
 );
 
+export class CharacterItem extends Item {
+  characterId: string;
+  userId: string;
+  name: string;
+  description: string;
+  properties: Array<{ name: string; value: string }>;
+  numberOfConversations: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const characterSchema = new Schema(
   {
     pk: {
@@ -60,6 +71,22 @@ export const characterSchema = new Schema(
       map: "characterId",
     },
     name: String,
+    description: {
+      type: String,
+      default: "",
+    },
+    properties: {
+      type: Array,
+      schema: [
+        {
+          type: Object,
+          schema: {
+            name: String,
+            value: String,
+          },
+        },
+      ],
+    },
     numberOfConversations: {
       type: Number,
       default: 0,
