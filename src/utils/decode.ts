@@ -15,6 +15,20 @@ export const decode = <A>(input: unknown, decoder: Decoder<unknown, A>): A => {
   )(decoded);
 };
 
+export const decodeList = <A>(
+  input: unknown[],
+  decoder: Decoder<unknown, Array<A>>
+): A[] => {
+  const decoded = decoder.decode(input);
+
+  return fold(
+    () => {
+      throw new DecodingError(`${PathReporter.report(decoded).toString()}`);
+    },
+    (right: A[]) => right
+  )(decoded);
+};
+
 export const decodeNotThrow = <A>(
   input: unknown,
   decoder: Decoder<unknown, A>

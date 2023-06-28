@@ -9,6 +9,7 @@
     "deploy": "npm run build && cdk deploy --require-approval never --all",
     "watch": "tsc -w",
     "test": "jest",
+    "test:unit": "npm run build && jest ./test/unit",
     "test:integration": "npm run build && jest ./test/integration",
     "test:endToEnd": "jest ./test/end-to-end",
     "cdk": "cdk",
@@ -18,6 +19,7 @@
   },
   "devDependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.303.0",
+    "@fluffy-spoon/substitute": "1.208.0",
     "@types/aws-lambda": "^8.10.83",
     "@types/jest": "^29.5.0",
     "@types/node": "^18.14.6",

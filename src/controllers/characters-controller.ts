@@ -2,11 +2,15 @@ import {
   APIGatewayProxyWithCognitoAuthorizerEvent,
   APIGatewayProxyResult,
 } from "aws-lambda";
-import { internalServerError, invalidRequest } from "../utils/api-errors";
+import {
+  internalServerError,
+  invalidRequest,
+  missingCharacterPropertiesError,
+} from "../utils/api-errors";
 import { formatResponse } from "../utils/format-response";
 import { Log } from "../utils/logger";
 import { decodeNotThrow } from "../utils/decode";
-import { CreateCharacterInput } from "../data/dto";
+import { CreateCharacterInput, RequiredCharacterProperties } from "../data/dto";
 import { CharacterService } from "../services/character-service";
 
 export class CharactersController {
@@ -59,15 +63,35 @@ export class CharactersController {
       if (!parsedInput) {
         return invalidRequest();
       }
+
+      const suppliedProperties = parsedInput.properties.map(
+        (property) => property.name
+      );
+
+      const missingCharacterProperties: Array<string> = [];
+      for (const requiredProperty of RequiredCharacterProperties) {
+        if (!suppliedProperties.includes(requiredProperty)) {
+          missingCharacterProperties.push(requiredProperty);
+        }
+      }
+      if (missingCharacterProperties.length > 0) {
+        return missingCharacterPropertiesError(missingCharacterProperties);
+      }
+
       const character = await this.characterService.createCharacter(
         event.requestContext.authorizer.claims.sub,
-        { name: parsedInput.name }
+        {
+          name: parsedInput.name,
+          description: parsedInput.description,
+          properties: parsedInput.properties,
+        }
       );
-      return formatResponse(200, { character: JSON.stringify(character) });
+
+      Log.info(`Character created successfully.`);
+
+      return formatResponse(200, { ...character });
     } catch (error) {
-      if (error instanceof Error) {
-        Log.error(`Could not create character.`, error);
-      }
+      Log.error(`Could not create character.`);
       return internalServerError();
     }
   }

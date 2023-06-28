@@ -7,8 +7,23 @@ export const Message = iots.type({
 });
 export type Message = iots.TypeOf<typeof Message>;
 
-export const Character = iots.type({
+export const CharacterProperty = iots.type({
   name: iots.string,
+  value: iots.string,
+});
+export type CharacterProperty = iots.TypeOf<typeof CharacterProperty>;
+
+export const RequiredCharacterProperties = ["life_goal"];
+
+export const Character = iots.strict({
+  characterId: iots.string,
+  userId: iots.string,
+  name: iots.string,
+  description: iots.string,
+  properties: iots.array(CharacterProperty),
+  numberOfConversations: iots.number,
+  created_at: iots.string,
+  updated_at: iots.string,
 });
 export type Character = iots.TypeOf<typeof Character>;
 
@@ -22,11 +37,6 @@ export const SendMessageInput = iots.type({
   message: iots.string,
 });
 export type SendMessageInput = iots.TypeOf<typeof SendMessageInput>;
-
-const CharacterProperty = iots.type({
-  name: iots.string,
-  value: iots.string,
-});
 
 export const CreateCharacterInput = iots.type({
   name: iots.string,

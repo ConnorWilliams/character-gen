@@ -7,6 +7,11 @@ export enum OAuthError {
   INVALID_CLIENT = "invalid_client",
 }
 
+export enum ResourceTypes {
+  CHARACTER = "character",
+  CHAT = "chat",
+}
+
 export enum APIError {
   INTERNAL_ERROR = "internal_error",
   INVALID_REQUEST = "invalid_request",
@@ -43,6 +48,16 @@ export const invalidRequest = (): APIGatewayProxyResult =>
     error_description: INVALID_REQUEST_ERROR,
   });
 
+export const missingCharacterPropertiesError = (
+  missingCharacterProperties: string[]
+): APIGatewayProxyResult =>
+  formatResponse(400, {
+    error: APIError.INVALID_REQUEST,
+    error_description: `Missing required properties: ${missingCharacterProperties.join(
+      ", "
+    )}.`,
+  });
+
 export const invalidSignature = (): APIGatewayProxyResult =>
   formatResponse(400, {
     error: SigningError.SIGNATURE,
@@ -53,4 +68,14 @@ export const notFound = (): APIGatewayProxyResult =>
   formatResponse(404, {
     error: APIError.NOT_FOUND,
     error_description: NOT_FOUND_ERROR,
+  });
+
+export const alreadyExists = (
+  resourceType: ResourceTypes
+): APIGatewayProxyResult =>
+  formatResponse(409, {
+    error: APIError.CONFLICT,
+    error_description: `${
+      resourceType.charAt(0).toUpperCase() + resourceType.slice(1)
+    } already exists.`,
   });

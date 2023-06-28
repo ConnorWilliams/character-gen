@@ -1,8 +1,15 @@
 import { APIGatewayProxyResult } from "aws-lambda";
 
+type JSONValue =
+  | string
+  | number
+  | boolean
+  | { [x: string]: JSONValue }
+  | Array<JSONValue>;
+
 export const formatResponse = (
   statusCode: number,
-  body: { [key: string]: string | number } | "" = ""
+  body: JSONValue | "" = ""
 ): APIGatewayProxyResult => {
   return {
     isBase64Encoded: false,

@@ -1,23 +1,14 @@
 import { Item } from "dynamoose/dist/Item";
 import { Schema } from "dynamoose";
-import { Message } from "../dto";
+import { Character, Message } from "../dto";
 
 export class ChatItem extends Item {
   chatId: string;
   userId: string;
-  character: CharacterItem;
+  character: Character;
   initialPrompt: string;
   messages: Array<Message>;
   createdAt: string;
-}
-
-export class CharacterItem extends Item {
-  characterId: string;
-  userId: string;
-  name: string;
-  numberOfConversations: number;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export const chatSchema = new Schema(

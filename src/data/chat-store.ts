@@ -1,11 +1,11 @@
 import { Log } from "../utils/logger";
 import { ChatStoreError } from "../utils/errors";
 import { Model } from "dynamoose/dist/Model";
-import { CharacterItem, ChatItem, chatSchema } from "./dynamoose/chat";
+import { ChatItem, chatSchema } from "./dynamoose/chat";
 import * as dynamoose from "dynamoose";
 import { DYNAMOOSE_DEFAULT_OPTIONS } from "../utils/dynamoose";
 import { narrowOrThrow } from "../utils/narrow-or-throw";
-import { Message } from "./dto";
+import { Character, Message } from "./dto";
 import { v4 as uuidv4 } from "uuid";
 
 export class ChatStore {
@@ -56,7 +56,7 @@ export class ChatStore {
 
   public async createChat(
     userId: string,
-    character: CharacterItem
+    character: Character
   ): Promise<ChatItem> {
     try {
       return await this.model.create({
