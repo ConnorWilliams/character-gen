@@ -54,7 +54,7 @@ export class CharactergenApiStack extends Stack {
     const chats = api.root.addResource("chat");
     const chat = chats.addResource("{chatId}");
     const characters = api.root.addResource("character");
-    const character = chats.addResource("{characterId}");
+    const character = characters.addResource("{characterId}");
 
     // Get Chats
     const getChatsHandler = new ApiLambda(this, `GetChatsFunction`, {
