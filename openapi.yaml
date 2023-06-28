@@ -11,14 +11,87 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-  schemas: {}
+  schemas:
+    Message:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the sender
+        timestamp:
+          type: number
+          format: timestamptz
+          description: Timestamp of the message
+        text:
+          type: string
+          description: Message text
+    Chat:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Chat ID
+        created_at:
+          type: number
+          format: timestamptz
+          description: Creation timestamp of the chat
+          default: now
+        initial_prompt:
+          type: string
+          description: Initial prompt sent to ChatGPT for the conversation
+        character_id:
+          type: integer
+          format: int64
+          description: ID of the character associated with the chat
+        user_id:
+          type: integer
+          format: int64
+          description: ID of the user associated with the chat
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+    Character:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Character ID
+        created_at:
+          type: number
+          format: timestamptz
+          description: Creation timestamp of the character
+          default: now
+        name:
+          type: string
+          description: Character name
+        description:
+          type: string
+          description: Character bio
+        properties:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: "The name of the property"
+              value:
+                type: string
+                description: "The value of the property"
+        user_id:
+          type: integer
+          format: int64
+          description: ID of the user who created the character
 paths:
-  /chat:
+  /character:
     get:
-      summary: Get all chats
-      description: Get all chats
+      summary: Get all characters
+      description: Get all characters
       tags:
-        - chat
+        - character
       security:
         - bearerAuth: []
       parameters: []
@@ -30,44 +103,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                      format: int64
-                      description: ''
-                    created_at:
-                      type: number
-                      format: timestamptz
-                      description: ''
-                      default: now
-                    initial_prompt:
-                      type: string
-                      description: >-
-                        The initial prompt sent to ChatGPT for this characters
-                        conversation
-                    character_name:
-                      type: string
-                      description: ''
-                    user_id:
-                      type: integer
-                      format: int64
-                      description: ''
-                    messages:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          name:
-                            type: string
-                            description: Name of who sent the message
-                          timestamp:
-                            type: number
-                            format: timestamptz
-                            description: ''
-                          text:
-                            type: string
-                            description: ''
+                  $ref: '#/components/schemas/Character'
         '400':
           description: Input Error. Check the request payload for issues.
         '403':
@@ -81,10 +117,13 @@ paths:
         '500':
           description: Unexpected error
     post:
-      summary: Start a chat with your new friend
-      description: Start a chat with your new friend
+      summary: Create a new character
+      description: |
+        Create a new character.
+
+        Required properties are: `life_goal`.
       tags:
-        - chat
+        - character
       security:
         - bearerAuth: []
       parameters: []
@@ -94,49 +133,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  text:
-                    type: string
-                  chatId:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        format: int64
-                        description: ''
-                      created_at:
-                        type: number
-                        format: timestamptz
-                        description: ''
-                        default: now
-                      initial_prompt:
-                        type: string
-                        description: >-
-                          The initial prompt sent to ChatGPT for this characters
-                          conversation
-                      character_name:
-                        type: string
-                        description: ''
-                      user_id:
-                        type: integer
-                        format: int64
-                        description: ''
-                      messages:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                              description: Name of who sent the message
-                            timestamp:
-                              type: number
-                              format: timestamptz
-                              description: ''
-                            text:
-                              type: string
-                              description: ''
+                $ref: '#/components/schemas/Character'
         '400':
           description: Input Error. Check the request payload for issues.
         '403':
@@ -157,20 +154,88 @@ paths:
               properties:
                 name:
                   type: string
-                  description: ''
-                life_goal:
+                  description: "The character's name"
+                description:
                   type: string
-                  description: ''
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  description: ''
-                life_oal:
-                  type: string
-                  description: ''
+                  description: "The character's bio"
+                properties:
+                  type: array
+                  description: |
+                    Properties of the character. These can be anything you want!
+                    
+                    Required properties are: `life_goal`
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: "The name of the property"
+                      value:
+                        type: string
+                        description: "The value of the property"
+  /chat/{character_id}/:
+    post:
+      summary: Start a chat with your character
+      description: Start a chat with your character
+      tags:
+        - chat
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: character_id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Success!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '400':
+          description: Input Error. Check the request payload for issues.
+        '403':
+          description: >-
+            Access denied. Additional priviledges are needed access the
+            requested resource.
+        '404':
+          description: Not Found. The requested resource does not exist.
+        '429':
+          description: Rate Limited. Too many requests.
+        '500':
+          description: Unexpected error
+  /chat:
+    get:
+      summary: Get all chats
+      description: Get all chats
+      tags:
+        - chat
+      security:
+        - bearerAuth: []
+      parameters: []
+      responses:
+        '200':
+          description: Success!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '400':
+          description: Input Error. Check the request payload for issues.
+        '403':
+          description: >-
+            Access denied. Additional priviledges are needed access the
+            requested resource.
+        '404':
+          description: Not Found. The requested resource does not exist.
+        '429':
+          description: Rate Limited. Too many requests.
+        '500':
+          description: Unexpected error
   /chat/{chat_id}:
     get:
       summary: Get a chat and its messages
@@ -193,47 +258,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  messages:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        format: int64
-                        description: ''
-                      created_at:
-                        type: number
-                        format: timestamptz
-                        description: ''
-                        default: now
-                      initial_prompt:
-                        type: string
-                        description: >-
-                          The initial prompt sent to ChatGPT for this characters
-                          conversation
-                      character_name:
-                        type: string
-                        description: ''
-                      user_id:
-                        type: integer
-                        format: int64
-                        description: ''
-                      messages:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                              description: Name of who sent the message
-                            timestamp:
-                              type: number
-                              format: timestamptz
-                              description: ''
-                            text:
-                              type: string
-                              description: ''
+                $ref: '#/components/schemas/Chat'
         '400':
           description: Input Error. Check the request payload for issues.
         '403':
@@ -272,9 +297,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  ai_message:
+                  message:
                     type: string
-                  human_message:
+                  response:
                     type: string
         '400':
           description: Input Error. Check the request payload for issues.
@@ -294,14 +319,14 @@ paths:
             schema:
               type: object
               properties:
-                text:
+                message:
                   type: string
                   description: ''
           multipart/form-data:
             schema:
               type: object
               properties:
-                text:
+                message:
                   type: string
                   description: ''
     delete:
