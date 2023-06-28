@@ -29,12 +29,12 @@
     "node_modules",
     "cdk.out",
     "dist",
+    "test"
   ],
   "include": [
     "types/**/*",
     "cdk",
-    "src",
-    "test"
+    "src"
   ],
   "types": [
     "types/**/*",
