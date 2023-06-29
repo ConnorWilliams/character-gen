@@ -1,7 +1,29 @@
 #!/usr/bin/env node
-import { App } from "aws-cdk-lib";
+import { App, AppProps } from "aws-cdk-lib";
 import { CharactergenApiStack } from "./charactergen-api-stack";
+import { Env, getEnvConfig } from "./env";
+import { narrowOrThrow } from "../src/utils/narrow-or-throw";
 
-const app = new App();
+const stageName = narrowOrThrow<string>(
+  process.env.DEPLOY_STAGE,
+  "Expected to receive DEPLOY_STAGE environment variable."
+).toLowerCase();
 
-new CharactergenApiStack(app, "CharactergenApiStack", {});
+interface MyAppProps extends AppProps {
+  readonly envConfig: Env;
+}
+
+const envConfig = getEnvConfig(stageName);
+
+class MyApp extends App {
+  constructor(props: MyAppProps) {
+    super();
+    this.node.setContext("envConfig", props.envConfig);
+  }
+}
+
+const app = new MyApp({
+  envConfig,
+});
+
+new CharactergenApiStack(app, "CharactergenApiStack", { stageName });

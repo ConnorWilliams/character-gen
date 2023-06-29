@@ -12,8 +12,12 @@ import { ApiLambda, TablePermissions } from "./constructs/api-lambda";
 
 const stageName = `dev`; // TODO: Make dynamic
 
+interface CharactergenApiStackProps extends StackProps {
+  readonly stageName: string;
+}
+
 export class CharactergenApiStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props?: CharactergenApiStackProps) {
     super(scope, id, props);
 
     const userPool = new UserPool(this, "UserPool", {

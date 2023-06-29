@@ -7,6 +7,8 @@ import { Duration } from "aws-cdk-lib";
 import { Effect, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { kebabCase, pascalCase } from "../../src/utils/cases";
 import { DDB_READ, DDB_WRITE } from "../services/policy-service";
+import { decode } from "../../src/utils/decode";
+import { Env } from "../env";
 
 export class TablePermissions extends Map<Table, Array<`read` | `write`>> {}
 
@@ -18,6 +20,7 @@ export interface ApiLambdaProps {
   functionHandler: string;
   environment: { [key: string]: string };
   tablePermissions: TablePermissions;
+  logLevel?: string;
 }
 
 export class ApiLambda extends Construct {
@@ -25,6 +28,8 @@ export class ApiLambda extends Construct {
 
   constructor(scope: Construct, id: string, props: ApiLambdaProps) {
     super(scope, id);
+
+    const envConfig = decode(scope.node.tryGetContext("envConfig"), Env);
 
     this.function = new NodejsFunction(
       this,
@@ -38,6 +43,7 @@ export class ApiLambda extends Construct {
         logRetention: RetentionDays.ONE_DAY,
         environment: {
           DEPLOY_STAGE: props.stageName,
+          LOG_LEVEL: props.logLevel || envConfig.logLevel || `INFO`,
           ...props.environment,
         },
         runtime: Runtime.NODEJS_18_X,
