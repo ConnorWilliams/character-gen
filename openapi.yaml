@@ -94,6 +94,15 @@ components:
         message:
           type: string
           description: Error message
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error code
+        error_description:
+          type: string
+          description: Error description
 paths:
   /character:
     get:
@@ -151,6 +160,10 @@ paths:
                 $ref: '#/components/schemas/Character'
         '400':
           description: Input Error. Check the request payload for issues.
+          content:
+            application/json:
+                schema:
+                    $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Authorization information is missing or invalid.
           content:
