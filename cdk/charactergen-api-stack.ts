@@ -5,12 +5,12 @@ import {
   LambdaIntegration,
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
-import { UserPool } from "aws-cdk-lib/aws-cognito";
+import { CfnUserPoolUser, UserPool } from "aws-cdk-lib/aws-cognito";
 import { AttributeType, BillingMode, Table } from "aws-cdk-lib/aws-dynamodb";
 import { Construct } from "constructs";
 import { ApiLambda, TablePermissions } from "./constructs/api-lambda";
 
-const stageName = `dev`;
+const stageName = `dev`; // TODO: Make dynamic
 
 export class CharactergenApiStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -33,6 +33,11 @@ export class CharactergenApiStack extends Stack {
       },
     });
 
+    new CfnUserPoolUser(this, "AdminUserPoolUser", {
+      userPoolId: userPool.userPoolId,
+      username: `connor_williams+adminuser-${stageName}@msn.com`,
+    });
+
     const authorizer = new CognitoUserPoolsAuthorizer(this, "Authorizer", {
       cognitoUserPools: [userPool],
     });
@@ -49,7 +54,11 @@ export class CharactergenApiStack extends Stack {
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
 
-    const api = new RestApi(this, "CharacterGenApi", {});
+    const api = new RestApi(this, "CharacterGenApi", {
+      deployOptions: {
+        stageName: stageName,
+      },
+    });
     api.root.addMethod("ANY");
     const chats = api.root.addResource("chat");
     const chat = chats.addResource("{chatId}");

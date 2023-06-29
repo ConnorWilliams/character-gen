@@ -5,10 +5,10 @@ import { CharacterItem, characterSchema } from "./dynamoose/chat";
 import * as dynamoose from "dynamoose";
 import { DYNAMOOSE_DEFAULT_OPTIONS } from "../utils/dynamoose";
 import { narrowOrThrow } from "../utils/narrow-or-throw";
-import { Character, CreateCharacterInput } from "./dto";
+import { Character, CharacterProperty, CreateCharacterInput } from "./dto";
 import { v4 as uuidv4 } from "uuid";
 import { decode, decodeList } from "../utils/decode";
-import { array, string } from "io-ts";
+import { array, number, string } from "io-ts";
 
 export class CharacterStore {
   private readonly model: Model;
@@ -25,13 +25,16 @@ export class CharacterStore {
     );
 
     this.model.serializer.add("CharacterSerializer", {
-      modify: (serialized, original) => {
+      modify: (_, original) => {
         return {
-          ...serialized,
           userId: decode(original.pk, string),
           characterId: decode(original.sk, string),
-          createdAt: new Date(original.createdAt * 1000).toLocaleString(),
-          updatedAt: new Date(original.updatedAt * 1000).toLocaleString(),
+          name: decode(original.name, string),
+          description: decode(original.description, string),
+          numberOfConversations: decode(original.numberOfConversations, number),
+          createdAt: new Date(original.createdAt).toLocaleString(),
+          updatedAt: new Date(original.updatedAt).toLocaleString(),
+          properties: decode(original.properties, array(CharacterProperty)),
         };
       },
     });
@@ -82,6 +85,7 @@ export class CharacterStore {
         userId: userId,
         characterId: `character#${uuidv4()}`,
         name: characterInput.name,
+        description: characterInput.description,
         properties: characterInput.properties,
       });
       const serializedCharacter = character.serialize("CharacterSerializer");

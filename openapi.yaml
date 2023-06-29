@@ -4,7 +4,10 @@ info:
   description: 'An API to generate and interact with any character you can imagine!'
   version: 0.0.1
 servers:
-  - url: https://
+  - url: https://f3e5uzg5tb.execute-api.eu-central-1.amazonaws.com
+    description: Main (production) URL
+  - url: https://f3e5uzg5tb.execute-api.eu-central-1.amazonaws.com/dev
+    description: Dev deployment URL
 components:
   securitySchemes:
     bearerAuth:
@@ -60,8 +63,8 @@ components:
           format: int64
           description: Character ID
         created_at:
-          type: number
-          format: timestamptz
+          type: string
+          format: date-time
           description: Creation timestamp of the character
           default: now
         name:
@@ -85,6 +88,12 @@ components:
           type: integer
           format: int64
           description: ID of the user who created the character
+    Unauthorized:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
 paths:
   /character:
     get:
@@ -106,6 +115,12 @@ paths:
                   $ref: '#/components/schemas/Character'
         '400':
           description: Input Error. Check the request payload for issues.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+                schema:
+                    $ref: '#/components/schemas/Unauthorized'
         '403':
           description: >-
             Access denied. Additional priviledges are needed access the
@@ -136,6 +151,12 @@ paths:
                 $ref: '#/components/schemas/Character'
         '400':
           description: Input Error. Check the request payload for issues.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+                schema:
+                    $ref: '#/components/schemas/Unauthorized'
         '403':
           description: >-
             Access denied. Additional priviledges are needed access the
@@ -151,6 +172,10 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - name
+                - description
+                - properties
               properties:
                 name:
                   type: string
@@ -198,6 +223,12 @@ paths:
                 $ref: '#/components/schemas/Chat'
         '400':
           description: Input Error. Check the request payload for issues.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+                schema:
+                    $ref: '#/components/schemas/Unauthorized'
         '403':
           description: >-
             Access denied. Additional priviledges are needed access the
@@ -226,6 +257,12 @@ paths:
                 $ref: '#/components/schemas/Chat'
         '400':
           description: Input Error. Check the request payload for issues.
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+                schema:
+                    $ref: '#/components/schemas/Unauthorized'
         '403':
           description: >-
             Access denied. Additional priviledges are needed access the
