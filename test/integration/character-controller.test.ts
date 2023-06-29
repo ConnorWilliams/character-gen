@@ -33,4 +33,19 @@ describe("character controller", () => {
       expect(createCharacterResponse.statusCode).toEqual(200);
     });
   });
+
+  describe("get characters", () => {
+    it("gets all characters owned by a user", async () => {
+      const getCharacterResponse = await charactersController.getCharacters({
+        requestContext: {
+          authorizer: {
+            claims: {
+              sub: "5c6182b6-e426-4ea4-b8fa-5a88c66898de",
+            },
+          },
+        },
+      } as any);
+      expect(getCharacterResponse.statusCode).toEqual(200);
+    });
+  });
 });

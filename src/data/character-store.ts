@@ -7,7 +7,7 @@ import { DYNAMOOSE_DEFAULT_OPTIONS } from "../utils/dynamoose";
 import { narrowOrThrow } from "../utils/narrow-or-throw";
 import { Character, CharacterProperty, CreateCharacterInput } from "./dto";
 import { v4 as uuidv4 } from "uuid";
-import { decode, decodeList } from "../utils/decode";
+import { decode } from "../utils/decode";
 import { array, number, string } from "io-ts";
 
 export class CharacterStore {
@@ -24,7 +24,7 @@ export class CharacterStore {
       DYNAMOOSE_DEFAULT_OPTIONS
     );
 
-    this.model.serializer.add("CharacterSerializer", {
+    this.model.serializer.add("CreateCharacterSerializer", {
       modify: (_, original) => {
         return {
           userId: decode(original.pk, string),
@@ -35,6 +35,16 @@ export class CharacterStore {
           createdAt: new Date(original.createdAt).toLocaleString(),
           updatedAt: new Date(original.updatedAt).toLocaleString(),
           properties: decode(original.properties, array(CharacterProperty)),
+        };
+      },
+    });
+
+    this.model.serializer.add("QueryCharacterSerializer", {
+      modify: (serialized, original) => {
+        return {
+          ...serialized,
+          createdAt: new Date(original.createdAt).toLocaleString(),
+          updatedAt: new Date(original.updatedAt).toLocaleString(),
         };
       },
     });
@@ -49,10 +59,12 @@ export class CharacterStore {
         .where("characterId")
         .beginsWith("character")
         .exec();
-      return decodeList(characters, array(Character));
+      return characters.map((character) =>
+        decode(character.serialize("QueryCharacterSerializer"), Character)
+      );
     } catch (error) {
       if (error instanceof Error) {
-        Log.warn(`Could not complete dynamo GET operation`, error);
+        Log.warn(`Could not get characters`, error);
       }
       throw new ChatStoreError(`Could not get character records`);
     }
@@ -88,7 +100,9 @@ export class CharacterStore {
         description: characterInput.description,
         properties: characterInput.properties,
       });
-      const serializedCharacter = character.serialize("CharacterSerializer");
+      const serializedCharacter = character.serialize(
+        "CreateCharacterSerializer"
+      );
       return decode(serializedCharacter, Character);
     } catch (error) {
       if (error instanceof DecodingError) {

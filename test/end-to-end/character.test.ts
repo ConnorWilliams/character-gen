@@ -13,7 +13,7 @@ jestOpenAPI(path.resolve(__dirname, "./../../openapi.yaml"));
 
 describe("Character API", () => {
   let jwt: string;
-  const username = `connor_williams+testuser-${DEPLOY_STAGE}@msn.com`;
+  const username = `cojwilliams+testuser-${DEPLOY_STAGE}@gmail.com`;
   const testpassword = "ThisIsMy1stTestPassword@";
   const userpoolClientName = `e2etest${DEPLOY_STAGE}`;
   const cognitoClient = new CognitoIdentityProviderClient({});
@@ -61,7 +61,7 @@ describe("Character API", () => {
       expect(createCharacterResponse).toSatisfyApiSpec();
     });
 
-    it("returns 40X if a required property is missing", async () => {
+    it("returns 400 if a required property is missing", async () => {
       const createCharacterResponse = await axios.post(
         `${API_URL}/character`,
         {
@@ -71,13 +71,16 @@ describe("Character API", () => {
         },
         {
           validateStatus: () => true,
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
         }
       );
-      expect(createCharacterResponse.status).toEqual(401);
+      expect(createCharacterResponse.status).toEqual(400);
       expect(createCharacterResponse).toSatisfyApiSpec();
     });
 
-    it("returns 40X if no JWT is supplied", async () => {
+    it("returns 401 if no JWT is supplied", async () => {
       const createCharacterResponse = await axios.post(
         `${API_URL}/character`,
         {
@@ -96,6 +99,19 @@ describe("Character API", () => {
       );
       expect(createCharacterResponse.status).toEqual(401);
       expect(createCharacterResponse).toSatisfyApiSpec();
+    });
+  });
+
+  describe("Get characters", () => {
+    it("returns 200 and a list of characters", async () => {
+      const getCharacterResponse = await axios.get(`${API_URL}/character`, {
+        validateStatus: () => true,
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
+      expect(getCharacterResponse.status).toEqual(200);
+      expect(getCharacterResponse).toSatisfyApiSpec();
     });
   });
 });
