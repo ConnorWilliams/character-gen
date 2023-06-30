@@ -7,7 +7,7 @@ import { DYNAMOOSE_DEFAULT_OPTIONS } from "../utils/dynamoose";
 import { narrowOrThrow } from "../utils/narrow-or-throw";
 import { Character, CharacterProperty, CreateCharacterInput } from "./dto";
 import { v4 as uuidv4 } from "uuid";
-import { decode } from "../utils/decode";
+import { decode, decodeNotThrow } from "../utils/decode";
 import { array, number, string } from "io-ts";
 
 export class CharacterStore {
@@ -73,13 +73,16 @@ export class CharacterStore {
   public async getCharacter(
     userId: string,
     characterId: string
-  ): Promise<Character> {
+  ): Promise<Character | undefined> {
     try {
       const character = await this.model.get({
         pk: userId,
         sk: `${characterId}`,
       });
-      return decode(character, Character);
+      return decodeNotThrow(
+        character.serialize("QueryCharacterSerializer"),
+        Character
+      );
     } catch (error) {
       if (error instanceof Error) {
         Log.warn(`Could not complete dynamo GET operation`, error);
@@ -121,9 +124,12 @@ export class CharacterStore {
       const character = await this.model.update({
         userId: characterInput.userId,
         characterId: characterInput.characterId,
-        numberOfConversations: characterInput.numberOfConversations++,
+        numberOfConversations: ++characterInput.numberOfConversations,
       });
-      return decode(character, Character);
+      return decode(
+        character.serialize("CreateCharacterSerializer"),
+        Character
+      );
     } catch (error) {
       if (error instanceof Error) {
         Log.warn(`Could not complete dynamo PUT operation`, error);

@@ -1,15 +1,17 @@
 import { Log } from "../utils/logger";
-import { ChatStoreError } from "../utils/errors";
+import { ChatStoreError, DecodingError } from "../utils/errors";
 import { Model } from "dynamoose/dist/Model";
 import { ChatItem, chatSchema } from "./dynamoose/chat";
 import * as dynamoose from "dynamoose";
 import { DYNAMOOSE_DEFAULT_OPTIONS } from "../utils/dynamoose";
 import { narrowOrThrow } from "../utils/narrow-or-throw";
-import { Character, Message } from "./dto";
+import { Character, Chat, Message } from "./dto";
 import { v4 as uuidv4 } from "uuid";
+import { decode, decodeNotThrow } from "../utils/decode";
+import { array, string } from "io-ts";
 
 export class ChatStore {
-  private readonly model: Model<ChatItem>;
+  private readonly model: Model;
   private readonly chatsTableName = narrowOrThrow(
     process.env.CHAT_TABLE_NAME,
     "CHAT_TABLE_NAME not set"
@@ -21,17 +23,44 @@ export class ChatStore {
       chatSchema,
       DYNAMOOSE_DEFAULT_OPTIONS
     );
+
+    this.model.serializer.add("CreateChatSerializer", {
+      modify: (_, original) => {
+        return {
+          userId: decode(original.pk, string),
+          chatId: decode(original.sk, string),
+          character: decode(JSON.parse(original.character), Character),
+          initialPrompt: decode(original.initialPrompt, string),
+          messages: decode(original.messages, array(Message)),
+          createdAt: new Date(original.createdAt).toLocaleString(),
+          updatedAt: new Date(original.updatedAt).toLocaleString(),
+        };
+      },
+    });
+
+    this.model.serializer.add("QueryChatSerializer", {
+      modify: (serialized, original) => {
+        return {
+          ...serialized,
+          createdAt: new Date(original.createdAt).toLocaleString(),
+          updatedAt: new Date(original.updatedAt).toLocaleString(),
+        };
+      },
+    });
   }
 
-  public async getChats(userId: string): Promise<ChatItem[]> {
+  public async getChats(userId: string): Promise<Chat[]> {
     try {
-      return await this.model
+      const chats = await this.model
         .query("pk")
         .eq(userId)
         .and()
         .where("sk")
         .beginsWith("chat")
         .exec();
+      return chats.map((chat) =>
+        decode(chat.serialize("QueryChatSerializer"), Chat)
+      );
     } catch (error) {
       if (error instanceof Error) {
         Log.warn(`Could not complete dynamo GET operation`, error);
@@ -40,12 +69,16 @@ export class ChatStore {
     }
   }
 
-  public async getChat(userId: string, chatId: string): Promise<ChatItem> {
+  public async getChat(
+    userId: string,
+    chatId: string
+  ): Promise<Chat | undefined> {
     try {
-      return await this.model.get({
+      const chat = await this.model.get({
         pk: userId,
         sk: `chat#${chatId}`,
       });
+      return decodeNotThrow(chat.serialize("QueryChatSerializer"), Chat);
     } catch (error) {
       if (error instanceof Error) {
         Log.warn(`Could not complete dynamo GET operation`, error);
@@ -56,17 +89,23 @@ export class ChatStore {
 
   public async createChat(
     userId: string,
-    character: Character
-  ): Promise<ChatItem> {
+    character: Character,
+    firstMessage: Message
+  ): Promise<Chat> {
     try {
-      return await this.model.create({
+      const chat = await this.model.create({
         userId: userId,
         chatId: `chat#${uuidv4()}`,
-        character: character,
-        initialPrompt: "",
-        messages: [],
+        character: JSON.stringify(character),
+        initialPrompt: "", //TODO: add initial prompt from openai
+        messages: [firstMessage],
       });
+      const serializedChat = chat.serialize("CreateChatSerializer");
+      return decode(serializedChat, Chat);
     } catch (error) {
+      if (error instanceof DecodingError) {
+        Log.warn(`Could not decode`, error);
+      }
       if (error instanceof Error) {
         Log.warn(`Could not complete dynamo PUT operation`, error);
       }
@@ -78,15 +117,20 @@ export class ChatStore {
     userId: string,
     chatId: string,
     message: Message
-  ): Promise<ChatItem> {
+  ): Promise<Chat> {
     try {
       const chat = await this.model.get({
         pk: userId,
         sk: `chat#${chatId}`,
       });
-      chat.messages.push(message);
-      return await this.model.update(chat);
+      const decodedChat = decode(chat.serialize("QueryChatSerializer"), Chat);
+      decodedChat.messages.push(message);
+      const updatedChat = await this.model.update(decodedChat);
+      return decode(updatedChat.serialize("CreateChatSerializer"), Chat);
     } catch (error) {
+      if (error instanceof DecodingError) {
+        Log.warn(`Could not decode`, error);
+      }
       if (error instanceof Error) {
         Log.warn(`Could not complete dynamo PUT operation`, error);
       }

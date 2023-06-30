@@ -27,13 +27,23 @@ export const Character = iots.type({
 });
 export type Character = iots.TypeOf<typeof Character>;
 
+export const Chat = iots.type({
+  chatId: iots.string,
+  userId: iots.string,
+  character: Character,
+  initialPrompt: iots.string,
+  messages: iots.array(Message),
+  createdAt: iots.string,
+  updatedAt: iots.string,
+});
+export type Chat = iots.TypeOf<typeof Chat>;
+
 export const StartChatInput = iots.type({
-  character_id: iots.string,
+  characterId: iots.string,
 });
 export type StartChatInput = iots.TypeOf<typeof StartChatInput>;
 
 export const SendMessageInput = iots.type({
-  chat_id: iots.string,
   message: iots.string,
 });
 export type SendMessageInput = iots.TypeOf<typeof SendMessageInput>;
@@ -44,3 +54,9 @@ export const CreateCharacterInput = iots.type({
   properties: iots.array(CharacterProperty),
 });
 export type CreateCharacterInput = iots.TypeOf<typeof CreateCharacterInput>;
+
+export const MessageResponse = iots.type({
+  message: Message,
+  response: Message,
+});
+export type MessageResponse = iots.TypeOf<typeof MessageResponse>;

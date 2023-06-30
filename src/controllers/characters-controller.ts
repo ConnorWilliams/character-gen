@@ -86,9 +86,6 @@ export class CharactersController {
           properties: parsedInput.properties,
         }
       );
-
-      Log.info(`Character created successfully.`);
-
       return formatResponse(200, { ...character });
     } catch (error) {
       Log.error(`Could not create character.`);

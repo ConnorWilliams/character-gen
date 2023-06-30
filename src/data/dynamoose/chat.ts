@@ -32,7 +32,7 @@ export const chatSchema = new Schema(
           type: Object,
           schema: {
             name: String,
-            timestamp: Date,
+            timestamp: String,
             text: String,
           },
         },
@@ -42,7 +42,7 @@ export const chatSchema = new Schema(
   {
     timestamps: {
       createdAt: "createdAt",
-      updatedAt: undefined, // updatedAt will not be stored as part of the timestamp
+      updatedAt: "updatedAt",
     },
   }
 );

@@ -211,22 +211,15 @@ paths:
                       value:
                         type: string
                         description: "The value of the property"
-  /chat/{character_id}/:
-    post:
-      summary: Start a chat with your character
-      description: Start a chat with your character
+  /chat:
+    get:
+      summary: Get all chats
+      description: Get all chats
       tags:
         - chat
       security:
         - bearerAuth: []
-      parameters:
-        - name: character_id
-          in: path
-          description: ''
-          required: true
-          schema:
-            type: integer
-            format: int64
+      parameters: []
       responses:
         '200':
           description: Success!
@@ -252,15 +245,24 @@ paths:
           description: Rate Limited. Too many requests.
         '500':
           description: Unexpected error
-  /chat:
-    get:
-      summary: Get all chats
-      description: Get all chats
+    post:
+      summary: Start a chat with your character
+      description: Start a chat with your character
       tags:
         - chat
       security:
         - bearerAuth: []
-      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - characterId
+              properties:
+                characterId:
+                  type: string
+                  description: "The character's id"
       responses:
         '200':
           description: Success!
@@ -348,9 +350,12 @@ paths:
                 type: object
                 properties:
                   message:
-                    type: string
+                    description: 'Your message to your character'
+                    $ref: '#/components/schemas/Message'
                   response:
-                    type: string
+                    description: 'Your character''s response'
+                    $ref: '#/components/schemas/Message'                  
+
         '400':
           description: Input Error. Check the request payload for issues.
         '403':
@@ -371,7 +376,7 @@ paths:
               properties:
                 message:
                   type: string
-                  description: ''
+                  description: 'Your message to your character'
           multipart/form-data:
             schema:
               type: object

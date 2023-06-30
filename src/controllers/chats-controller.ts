@@ -12,6 +12,7 @@ import { formatResponse } from "../utils/format-response";
 import { Log } from "../utils/logger";
 import { decodeNotThrow } from "../utils/decode";
 import { SendMessageInput, StartChatInput } from "../data/dto";
+import { CharacterNotFoundError } from "../utils/errors";
 
 export class ChatsController {
   constructor(private readonly chatService = new ChatService()) {}
@@ -23,7 +24,7 @@ export class ChatsController {
       const chats = await this.chatService.getChats(
         event.requestContext.authorizer.claims.sub
       );
-      return formatResponse(200, { chats: JSON.stringify(chats) });
+      return formatResponse(200, chats);
     } catch (error) {
       if (error instanceof Error) {
         Log.error(`Could not get chats.`, error);
@@ -46,7 +47,7 @@ export class ChatsController {
       if (!chat) {
         return notFound();
       }
-      return formatResponse(200, { chat: JSON.stringify(chat) });
+      return formatResponse(200, chat);
     } catch (error) {
       if (error instanceof Error) {
         Log.error(`Could not get chat.`, error);
@@ -68,10 +69,14 @@ export class ChatsController {
       }
       const chat = await this.chatService.startChat(
         event.requestContext.authorizer.claims.sub,
-        parsedInput.character_id
+        parsedInput.characterId
       );
-      return formatResponse(200, { chat: JSON.stringify(chat) });
+      return formatResponse(200, { ...chat });
     } catch (error) {
+      if (error instanceof CharacterNotFoundError) {
+        Log.error(`Could not find character to start chat.`, error);
+        return notFound();
+      }
       if (error instanceof Error) {
         Log.error(`Could not create chat.`, error);
       }
@@ -113,12 +118,12 @@ export class ChatsController {
       if (!parsedInput) {
         return invalidRequest();
       }
-      const chat = await this.chatService.sendMessage(
+      const messageResponse = await this.chatService.sendMessage(
         event.requestContext.authorizer.claims.sub,
         event.pathParameters.chatId,
-        event.body as string
+        parsedInput.message
       );
-      return formatResponse(200, { chat: JSON.stringify(chat) });
+      return formatResponse(200, messageResponse);
     } catch (error) {
       if (error instanceof Error) {
         Log.error(`Could not send message.`, error);

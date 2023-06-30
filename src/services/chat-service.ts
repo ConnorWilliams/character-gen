@@ -1,6 +1,5 @@
 import { ChatStore } from "../data/chat-store";
-import { Message } from "../data/dto";
-import { ChatItem } from "../data/dynamoose/chat";
+import { Chat, Message, MessageResponse } from "../data/dto";
 import { CharacterService } from "./character-service";
 
 export class ChatService {
@@ -9,23 +8,29 @@ export class ChatService {
     private readonly characterService = new CharacterService()
   ) {}
 
-  public async getChats(userId: string): Promise<ChatItem[]> {
+  public async getChats(userId: string): Promise<Chat[]> {
     return await this.chatStore.getChats(userId);
   }
 
-  public async getChat(userId: string, chatId: string): Promise<ChatItem> {
+  public async getChat(
+    userId: string,
+    chatId: string
+  ): Promise<Chat | undefined> {
     return await this.chatStore.getChat(userId, chatId);
   }
 
-  public async startChat(
-    userId: string,
-    characterId: string
-  ): Promise<ChatItem> {
+  public async startChat(userId: string, characterId: string): Promise<Chat> {
     const characterWithUpdatedChatCount =
       await this.characterService.incrementNumberOfChats(userId, characterId);
+    const firstMessage: Message = {
+      name: characterWithUpdatedChatCount.name,
+      text: `Hello user ${userId}, my name is ${characterWithUpdatedChatCount.name}. How can I help you today?`, // TODO: Add openai call here
+      timestamp: Date.now().toString(),
+    };
     return await this.chatStore.createChat(
       userId,
-      characterWithUpdatedChatCount
+      characterWithUpdatedChatCount,
+      firstMessage
     );
   }
 
@@ -36,13 +41,24 @@ export class ChatService {
   public async sendMessage(
     userId: string,
     chatId: string,
-    message: string
-  ): Promise<ChatItem> {
-    const messageItem: Message = {
-      name: userId,
-      text: message,
+    text: string
+  ): Promise<MessageResponse> {
+    let chat: Chat;
+    const message: Message = {
+      name: userId, //TODO: change to user name
+      text: text,
       timestamp: Date.now().toString(),
     };
-    return await this.chatStore.addMessageToChat(userId, chatId, messageItem);
+    chat = await this.chatStore.addMessageToChat(userId, chatId, message);
+    const response: Message = {
+      name: chat.character.name,
+      text: "Example response", //TODO: Add openai call here
+      timestamp: Date.now().toString(),
+    };
+    chat = await this.chatStore.addMessageToChat(userId, chatId, response);
+    return {
+      message,
+      response,
+    };
   }
 }

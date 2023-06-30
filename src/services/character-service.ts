@@ -1,5 +1,6 @@
 import { CharacterStore } from "../data/character-store";
 import { Character, CreateCharacterInput } from "../data/dto";
+import { CharacterNotFoundError } from "../utils/errors";
 
 export class CharacterService {
   constructor(private readonly characterStore = new CharacterStore()) {}
@@ -7,7 +8,7 @@ export class CharacterService {
   public async getCharacter(
     userId: string,
     characterId: string
-  ): Promise<Character> {
+  ): Promise<Character | undefined> {
     return await this.characterStore.getCharacter(userId, characterId);
   }
 
@@ -30,6 +31,11 @@ export class CharacterService {
       userId,
       characterId
     );
+    if (!character) {
+      throw new CharacterNotFoundError(
+        `Character not found with id ${characterId}`
+      );
+    }
     return await this.characterStore.incrementNumberOfConversations(character);
   }
 }

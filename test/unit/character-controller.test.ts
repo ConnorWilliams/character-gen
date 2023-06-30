@@ -3,8 +3,7 @@ import { Character } from "../../src/data/dto";
 import { CharacterService } from "../../src/services/character-service";
 import { v4 as uuidv4 } from "uuid";
 import Substitute, { Arg, SubstituteOf } from "@fluffy-spoon/substitute";
-import { Log } from "../../src/utils/logger";
-import { getTestCharacter } from "../utils/character-generator";
+import { getTestCharacter } from "../utils/fixture-generators";
 
 describe("characters controller", () => {
   let characterService: SubstituteOf<CharacterService>;
