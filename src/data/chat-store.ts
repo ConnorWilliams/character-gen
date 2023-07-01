@@ -42,6 +42,7 @@ export class ChatStore {
       modify: (serialized, original) => {
         return {
           ...serialized,
+          character: decode(JSON.parse(original.character), Character),
           createdAt: new Date(original.createdAt).toLocaleString(),
           updatedAt: new Date(original.updatedAt).toLocaleString(),
         };

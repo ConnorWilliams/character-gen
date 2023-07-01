@@ -22,8 +22,8 @@ components:
           type: string
           description: Name of the sender
         timestamp:
-          type: number
-          format: timestamptz
+          type: string
+          format: date-time
           description: Timestamp of the message
         text:
           type: string
@@ -36,8 +36,8 @@ components:
           format: int64
           description: Chat ID
         created_at:
-          type: number
-          format: timestamptz
+          type: string
+          format: date-time
           description: Creation timestamp of the chat
           default: now
         initial_prompt:
@@ -200,7 +200,7 @@ paths:
                   type: array
                   description: |
                     Properties of the character. These can be anything you want!
-                    
+
                     Required properties are: `life_goal`
                   items:
                     type: object
@@ -226,7 +226,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Chat'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chat'
         '400':
           description: Input Error. Check the request payload for issues.
         '401':
@@ -284,6 +286,10 @@ paths:
             requested resource.
         '404':
           description: Not Found. The requested resource does not exist.
+          content:
+            application/json:
+                schema:
+                    $ref: '#/components/schemas/ErrorResponse'
         '429':
           description: Rate Limited. Too many requests.
         '500':
@@ -350,11 +356,9 @@ paths:
                 type: object
                 properties:
                   message:
-                    description: 'Your message to your character'
                     $ref: '#/components/schemas/Message'
                   response:
-                    description: 'Your character''s response'
-                    $ref: '#/components/schemas/Message'                  
+                    $ref: '#/components/schemas/Message'
 
         '400':
           description: Input Error. Check the request payload for issues.

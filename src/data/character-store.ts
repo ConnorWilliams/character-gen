@@ -79,6 +79,9 @@ export class CharacterStore {
         pk: userId,
         sk: `${characterId}`,
       });
+      if (!character) {
+        return undefined;
+      }
       return decodeNotThrow(
         character.serialize("QueryCharacterSerializer"),
         Character

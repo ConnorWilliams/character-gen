@@ -100,7 +100,7 @@ export class CharactergenApiStack extends Stack {
       environment: {
         CHAT_TABLE_NAME: chatTable.tableName,
       },
-      tablePermissions: new TablePermissions([[chatTable, [`write`]]]),
+      tablePermissions: new TablePermissions([[chatTable, [`write`, `read`]]]),
     });
     const startChatIntegration = new LambdaIntegration(
       startChatHandler.function
