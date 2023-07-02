@@ -9,6 +9,7 @@ export class ChatItem extends Item {
   initialPrompt: string;
   messages: Array<Message>;
   createdAt: string;
+  updatedAt: string;
 }
 
 export const chatSchema = new Schema(

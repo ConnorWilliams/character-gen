@@ -28,7 +28,7 @@ export class ChatStore {
       modify: (_, original) => {
         return {
           userId: decode(original.pk, string),
-          chatId: decode(original.sk, string),
+          chatId: decode(original.sk, string).split("#").pop(),
           character: decode(JSON.parse(original.character), Character),
           initialPrompt: decode(original.initialPrompt, string),
           messages: decode(original.messages, array(Message)),
@@ -42,6 +42,7 @@ export class ChatStore {
       modify: (serialized, original) => {
         return {
           ...serialized,
+          chatId: decode(original.userId, string).split("#").pop(),
           character: decode(JSON.parse(original.character), Character),
           createdAt: new Date(original.createdAt).toLocaleString(),
           updatedAt: new Date(original.updatedAt).toLocaleString(),
@@ -126,7 +127,11 @@ export class ChatStore {
       });
       const decodedChat = decode(chat.serialize("QueryChatSerializer"), Chat);
       decodedChat.messages.push(message);
-      const updatedChat = await this.model.update(decodedChat);
+      const updatedChat = await this.model.update({
+        userId: userId,
+        chatId: `chat#${chatId}`,
+        messages: decodedChat.messages,
+      });
       return decode(updatedChat.serialize("CreateChatSerializer"), Chat);
     } catch (error) {
       if (error instanceof DecodingError) {

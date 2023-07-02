@@ -137,12 +137,12 @@ export class CharactergenApiStack extends Stack {
       functionName: `PostMessage`,
       functionDescription: `Posts a message to a chat`,
       functionEntry: `dist/src/chats-handler.js`,
-      functionHandler: `postMessage`,
+      functionHandler: `replyToChat`,
       stageName: stageName,
       environment: {
         CHAT_TABLE_NAME: chatTable.tableName,
       },
-      tablePermissions: new TablePermissions([[chatTable, [`write`]]]),
+      tablePermissions: new TablePermissions([[chatTable, [`write`, `read`]]]),
     });
 
     const postMessageIntegration = new LambdaIntegration(
@@ -151,6 +151,8 @@ export class CharactergenApiStack extends Stack {
 
     chat.addMethod("POST", postMessageIntegration, {
       operationName: `PostMessage`,
+      authorizationType: AuthorizationType.COGNITO,
+      authorizer: authorizer,
     });
 
     // Delete Chat

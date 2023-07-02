@@ -13,7 +13,7 @@ import jestOpenAPI from "jest-openapi";
 import * as path from "path";
 import { cons } from "fp-ts/lib/ReadonlyNonEmptyArray";
 import { createCognitoUserAndLogin } from "../utils/cognito-login";
-import { createCharacter } from "./utils";
+import { createCharacter, createChat } from "./utils";
 
 const API_URL = process.env.API_URL;
 jestOpenAPI(path.resolve(__dirname, "./../../openapi.yaml"));
@@ -77,6 +77,31 @@ describe("Chats API", () => {
       );
       expect(createChatResponse.status).toEqual(404);
       expect(createChatResponse).toSatisfyApiSpec();
+    });
+  });
+
+  describe("Reply to chat", () => {
+    it("returns 200 and a response", async () => {
+      const createCharacterResponse = await createCharacter(jwt);
+      const createChatResponse = await createChat(
+        jwt,
+        createCharacterResponse.data.characterId
+      );
+      console.log(`Chat ID is: ${createChatResponse.data.chatId}`);
+      const replyToChatResponse = await axios.post(
+        `${API_URL}/chat/${createChatResponse.data.chatId}`,
+        {
+          message: "Test message",
+        },
+        {
+          validateStatus: () => true,
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        }
+      );
+      expect(replyToChatResponse.status).toEqual(200);
+      expect(replyToChatResponse).toSatisfyApiSpec();
     });
   });
 
