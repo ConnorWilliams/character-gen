@@ -1,8 +1,12 @@
-# Welcome to your CDK TypeScript project
+# Character Generator
 
-This is a blank project for CDK development with TypeScript.
+This is a project that creates an application which generates characters. Whether the character is real, fictional, human or non-human this API will let you chat to any character you can think of!
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+It uses OpenAI APIs to generate responses for your characters.
+
+It is built completely with AWS Serverless - API Gateway, Lambda, DynamoDB
+
+All with infrastructure as code using CDK.
 
 ## Useful commands
 
