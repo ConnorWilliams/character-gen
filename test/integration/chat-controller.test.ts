@@ -85,12 +85,9 @@ async function createCharacter(
     body: JSON.stringify({
       name: "testCharacterName",
       description: "test description",
-      properties: [
-        {
-          name: "life_goal",
-          value: "test life goal",
-        },
-      ],
+      properties: {
+        life_goal: "test life goal",
+      },
     }),
   } as any);
 }

@@ -7,12 +7,9 @@ export function getTestCharacter(character?: Partial<Character>): Character {
     characterId: character?.characterId ?? faker.string.uuid(),
     name: character?.name ?? faker.person.fullName(),
     description: character?.description ?? faker.person.bio(),
-    properties: character?.properties ?? [
-      {
-        name: "life_goal",
-        value: `To be a ${faker.person.jobTitle()}`,
-      },
-    ],
+    properties: character?.properties ?? {
+      life_goal: `To be a ${faker.person.jobTitle()}`,
+    },
     numberOfConversations:
       character?.numberOfConversations ?? faker.number.int(),
     createdAt: character?.createdAt ?? faker.date.past().toISOString(),
@@ -28,9 +25,10 @@ export function getTestChat(chat?: Partial<Chat>): Chat {
     initialPrompt: chat?.initialPrompt ?? faker.lorem.sentence(),
     messages: chat?.messages ?? [
       {
-        name: faker.person.firstName(),
+        id: faker.string.uuid(),
         timestamp: faker.date.recent().toISOString(),
-        text: faker.lorem.sentence(),
+        content: faker.lorem.sentence(),
+        role: "user",
       },
     ],
     createdAt: chat?.createdAt ?? faker.date.past().toISOString(),

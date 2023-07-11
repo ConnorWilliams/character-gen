@@ -55,6 +55,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Message'
+    CharacterProperties:
+      type: object
+      description: |
+        Properties of the character. These can be anything you want!
+      properties:
+        life_goal:
+          type: string
+          description: "The character's life goal"
+      additionalProperties:
+        type: string
+      required:
+        - life_goal
     Character:
       type: object
       properties:
@@ -74,16 +86,7 @@ components:
           type: string
           description: Character bio
         properties:
-          type: array
-          items:
-            type: object
-            properties:
-              name:
-                type: string
-                description: "The name of the property"
-              value:
-                type: string
-                description: "The value of the property"
+          $ref: '#/components/schemas/CharacterProperties'
         user_id:
           type: integer
           format: int64
@@ -197,20 +200,7 @@ paths:
                   type: string
                   description: "The character's bio"
                 properties:
-                  type: array
-                  description: |
-                    Properties of the character. These can be anything you want!
-
-                    Required properties are: `life_goal`
-                  items:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                        description: "The name of the property"
-                      value:
-                        type: string
-                        description: "The value of the property"
+                  $ref: '#/components/schemas/CharacterProperties'
   /chat:
     get:
       summary: Get all chats

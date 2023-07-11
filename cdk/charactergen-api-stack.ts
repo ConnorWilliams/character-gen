@@ -1,4 +1,4 @@
-import { Stack, StackProps } from "aws-cdk-lib";
+import { Duration, SecretValue, Stack, StackProps } from "aws-cdk-lib";
 import {
   AuthorizationType,
   CognitoUserPoolsAuthorizer,
@@ -9,6 +9,8 @@ import { CfnUserPoolUser, UserPool } from "aws-cdk-lib/aws-cognito";
 import { AttributeType, BillingMode, Table } from "aws-cdk-lib/aws-dynamodb";
 import { Construct } from "constructs";
 import { ApiLambda, TablePermissions } from "./constructs/api-lambda";
+import { Secret } from "aws-cdk-lib/aws-secretsmanager";
+import { PolicyService } from "./services/policy-service";
 
 const stageName = `dev`; // TODO: Make dynamic
 
@@ -17,8 +19,22 @@ interface CharactergenApiStackProps extends StackProps {
 }
 
 export class CharactergenApiStack extends Stack {
+  private readonly policyService: PolicyService;
+
   constructor(scope: Construct, id: string, props?: CharactergenApiStackProps) {
     super(scope, id, props);
+
+    this.policyService = PolicyService.getInstance();
+
+    const openAiSecret = new Secret(this, "OpenAiSecret", {
+      secretName: `OpenAiSecret-${stageName}`,
+      description: `OpenAI API Key for ${stageName}`,
+      secretObjectValue: {
+        apiKeyName: SecretValue.unsafePlainText(""),
+        apiKey: SecretValue.unsafePlainText(""),
+        organizationId: SecretValue.unsafePlainText(""),
+      },
+    });
 
     const userPool = new UserPool(this, "UserPool", {
       userPoolName: "CharacterGenUserPool",
@@ -99,11 +115,20 @@ export class CharactergenApiStack extends Stack {
       stageName: stageName,
       environment: {
         CHAT_TABLE_NAME: chatTable.tableName,
+        OPENAI_SECRET_NAME: openAiSecret.secretArn,
       },
       tablePermissions: new TablePermissions([[chatTable, [`write`, `read`]]]),
+      timeout: Duration.seconds(5),
     });
     const startChatIntegration = new LambdaIntegration(
       startChatHandler.function
+    );
+
+    startChatHandler.function.addToRolePolicy(
+      this.policyService.getSecretsReadStatement([
+        // Wildcard (*) needed at the end of the ARN to account for the random 6 characters appended to secret names
+        `${openAiSecret.secretArn}*`,
+      ])
     );
 
     chats.addMethod("POST", startChatIntegration, {
@@ -141,12 +166,21 @@ export class CharactergenApiStack extends Stack {
       stageName: stageName,
       environment: {
         CHAT_TABLE_NAME: chatTable.tableName,
+        OPENAI_SECRET_NAME: openAiSecret.secretArn,
       },
       tablePermissions: new TablePermissions([[chatTable, [`write`, `read`]]]),
+      timeout: Duration.seconds(5),
     });
 
     const postMessageIntegration = new LambdaIntegration(
       postMessageHandler.function
+    );
+
+    postMessageHandler.function.addToRolePolicy(
+      this.policyService.getSecretsReadStatement([
+        // Wildcard (*) needed at the end of the ARN to account for the random 6 characters appended to secret names
+        `${openAiSecret.secretArn}*`,
+      ])
     );
 
     chat.addMethod("POST", postMessageIntegration, {

@@ -21,6 +21,7 @@ export interface ApiLambdaProps {
   environment: { [key: string]: string };
   tablePermissions: TablePermissions;
   logLevel?: string;
+  timeout?: Duration;
 }
 
 export class ApiLambda extends Construct {
@@ -47,7 +48,7 @@ export class ApiLambda extends Construct {
           ...props.environment,
         },
         runtime: Runtime.NODEJS_18_X,
-        timeout: Duration.seconds(3),
+        timeout: props.timeout || Duration.seconds(3),
       }
     );
 

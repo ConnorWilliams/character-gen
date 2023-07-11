@@ -43,12 +43,9 @@ describe("Character API", () => {
         {
           name: "Test Character",
           description: "Test Description",
-          properties: [
-            {
-              name: "life_goal",
-              value: "test life goal",
-            },
-          ],
+          properties: {
+            life_goal: "test life goal",
+          },
         },
         {
           validateStatus: () => true,
@@ -67,7 +64,7 @@ describe("Character API", () => {
         {
           name: "Test Character",
           description: "Test Description",
-          properties: [],
+          properties: {},
         },
         {
           validateStatus: () => true,
@@ -86,12 +83,9 @@ describe("Character API", () => {
         {
           name: "Test Character",
           description: "Test Description",
-          properties: [
-            {
-              name: "life_goal",
-              value: "test life goal",
-            },
-          ],
+          properties: {
+            life_goal: "test life goal",
+          },
         },
         {
           validateStatus: () => true,

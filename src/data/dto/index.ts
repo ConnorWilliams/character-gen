@@ -1,17 +1,12 @@
 import * as iots from "io-ts";
 
 export const Message = iots.type({
-  name: iots.string,
+  id: iots.string,
+  role: iots.union([iots.literal("user"), iots.literal("character")]),
   timestamp: iots.string,
-  text: iots.string,
+  content: iots.string,
 });
 export type Message = iots.TypeOf<typeof Message>;
-
-export const CharacterProperty = iots.type({
-  name: iots.string,
-  value: iots.string,
-});
-export type CharacterProperty = iots.TypeOf<typeof CharacterProperty>;
 
 export const RequiredCharacterProperties = ["life_goal"];
 
@@ -20,7 +15,7 @@ export const Character = iots.type({
   userId: iots.string,
   name: iots.string,
   description: iots.string,
-  properties: iots.array(CharacterProperty),
+  properties: iots.record(iots.string, iots.string),
   numberOfConversations: iots.number,
   createdAt: iots.string,
   updatedAt: iots.string,
@@ -51,7 +46,7 @@ export type SendMessageInput = iots.TypeOf<typeof SendMessageInput>;
 export const CreateCharacterInput = iots.type({
   name: iots.string,
   description: iots.string,
-  properties: iots.array(CharacterProperty),
+  properties: iots.record(iots.string, iots.string),
 });
 export type CreateCharacterInput = iots.TypeOf<typeof CreateCharacterInput>;
 
@@ -60,3 +55,10 @@ export const MessageResponse = iots.type({
   response: Message,
 });
 export type MessageResponse = iots.TypeOf<typeof MessageResponse>;
+
+export const OpenAiSecret = iots.type({
+  apiKeyName: iots.string,
+  apiKey: iots.string,
+  organizationId: iots.string,
+});
+export type OpenAiSecret = iots.TypeOf<typeof OpenAiSecret>;

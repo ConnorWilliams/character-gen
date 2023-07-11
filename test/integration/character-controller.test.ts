@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { CharactersController } from "../../src/controllers/characters-controller";
+import { Character } from "../../src/data/dto";
 
 describe("character controller", () => {
   let charactersController: CharactersController;
@@ -22,15 +23,26 @@ describe("character controller", () => {
           body: JSON.stringify({
             name: "testCharacterName",
             description: "test description",
-            properties: [
-              {
-                name: "life_goal",
-                value: "test life goal",
-              },
-            ],
+            properties: {
+              life_goal: "test life goal",
+            },
           }),
         } as any);
       expect(createCharacterResponse.statusCode).toEqual(200);
+      expect(JSON.parse(createCharacterResponse.body)).toMatchObject<Character>(
+        {
+          characterId: expect.any(String),
+          userId: expect.any(String),
+          name: expect.any(String),
+          description: expect.any(String),
+          properties: {
+            life_goal: "test life goal",
+          },
+          numberOfConversations: expect.any(Number),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }
+      );
     });
   });
 

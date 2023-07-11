@@ -1,27 +1,27 @@
 import { ChatsController } from "../../src/controllers/chats-controller";
-import { Character, Chat, Message, MessageResponse } from "../../src/data/dto";
+import { Chat, MessageResponse } from "../../src/data/dto";
 import { CharacterService } from "../../src/services/character-service";
 import { v4 as uuidv4 } from "uuid";
 import Substitute, { Arg, SubstituteOf } from "@fluffy-spoon/substitute";
-import { Log } from "../../src/utils/logger";
-import { getTestCharacter, getTestChat } from "../utils/fixture-generators";
-import { get } from "http";
+import { getTestChat } from "../utils/fixture-generators";
 import { ChatService } from "../../src/services/chat-service";
 import { CharacterNotFoundError } from "../../src/utils/errors";
 import { ChatStore } from "../../src/data/chat-store";
+import { OpenAiService } from "../../src/services/openai-service";
 
 describe("chat controller", () => {
   let characterService: SubstituteOf<CharacterService>;
   let chatStore: SubstituteOf<ChatStore>;
+  let openAiService: SubstituteOf<OpenAiService>;
   let chatService: ChatService;
   let httpController: ChatsController;
   const exampleUserId: string = uuidv4();
-  const exampleCharacterId: string = "exampleCharacterId";
 
   beforeEach(() => {
     characterService = Substitute.for<CharacterService>();
     chatStore = Substitute.for<ChatStore>();
-    chatService = new ChatService(chatStore, characterService);
+    openAiService = Substitute.for<OpenAiService>();
+    chatService = new ChatService(chatStore, characterService, openAiService);
     httpController = new ChatsController(chatService);
   });
 
@@ -29,6 +29,9 @@ describe("chat controller", () => {
     it("returns 200 and a new chat", async () => {
       const exampleChat: Chat = getTestChat();
       chatStore.createChat(Arg.all()).resolves(exampleChat);
+      openAiService
+        .startChat(Arg.all())
+        .resolves(`Hello it's me your character. How can I help you today?`);
       const response = await httpController.createChat({
         requestContext: {
           authorizer: {
@@ -108,6 +111,11 @@ describe("chat controller", () => {
     it("returns 200 and a reply when successful", async () => {
       const exampleChat: Chat = getTestChat();
       chatStore.addMessageToChat(Arg.all()).resolves(exampleChat);
+      openAiService
+        .getReply(Arg.all())
+        .resolves(
+          `This is me, your character, responding to your intelligent and funny message.`
+        );
       const response = await httpController.sendMessage({
         requestContext: {
           authorizer: {
@@ -126,13 +134,15 @@ describe("chat controller", () => {
       expect(response.statusCode).toEqual(200);
       expect(JSON.parse(response.body)).toMatchObject<MessageResponse>({
         message: {
-          name: expect.any(String),
-          text: expect.any(String),
+          id: expect.any(String),
+          content: expect.any(String),
+          role: expect.any(String),
           timestamp: expect.any(String),
         },
         response: {
-          name: expect.any(String),
-          text: expect.any(String),
+          id: expect.any(String),
+          content: expect.any(String),
+          role: expect.any(String),
           timestamp: expect.any(String),
         },
       });

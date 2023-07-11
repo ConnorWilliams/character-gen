@@ -71,7 +71,7 @@ export class ChatsController {
         event.requestContext.authorizer.claims.sub,
         parsedInput.characterId
       );
-      return formatResponse(200, { ...chat });
+      return formatResponse(200, chat);
     } catch (error) {
       if (error instanceof CharacterNotFoundError) {
         Log.error(`Could not find character to start chat.`, error);

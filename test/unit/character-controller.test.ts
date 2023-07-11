@@ -31,12 +31,9 @@ describe("characters controller", () => {
         body: JSON.stringify({
           name: "testCharacterName",
           description: "test description",
-          properties: [
-            {
-              name: "life_goal",
-              value: "test life goal",
-            },
-          ],
+          properties: {
+            life_goal: "test life goal",
+          },
         }),
       } as any);
       expect(response.statusCode).toEqual(200);
@@ -46,7 +43,7 @@ describe("characters controller", () => {
     });
 
     it("returns 400 and useful error message when missing required properties", async () => {
-      const exampleCharacter: Character = getTestCharacter({ properties: [] });
+      const exampleCharacter: Character = getTestCharacter({ properties: {} });
       characterService.createCharacter(Arg.all()).resolves(exampleCharacter);
       const response = await httpController.createCharacter({
         requestContext: {
@@ -59,12 +56,9 @@ describe("characters controller", () => {
         body: JSON.stringify({
           name: "testCharacterName",
           description: "test description",
-          properties: [
-            {
-              name: "age",
-              value: "20",
-            },
-          ],
+          properties: {
+            age: "20",
+          },
         }),
       } as any);
       expect(response.statusCode).toEqual(400);

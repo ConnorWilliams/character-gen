@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "@aws-lambda-powertools/logger": "1.4.0",
+    "@aws-sdk/client-secrets-manager": "^3.363.0",
     "@middy/core": "^4.2.8",
     "aws-cdk-lib": "2.69.0",
     "constructs": "^10.0.0",
@@ -48,6 +49,7 @@
     "esbuild": "^0.17.14",
     "fp-ts": "^2.13.1",
     "io-ts": "^2.2.20",
+    "openai": "^3.3.0",
     "source-map-support": "^0.5.21",
     "uuid": "^9.0.0"
   },

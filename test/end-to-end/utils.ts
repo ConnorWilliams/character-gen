@@ -8,12 +8,9 @@ export async function createCharacter(jwt: string) {
     {
       name: "Test Character",
       description: "Test Description",
-      properties: [
-        {
-          name: "life_goal",
-          value: "test life goal",
-        },
-      ],
+      properties: {
+        life_goal: "test life goal",
+      },
     },
     {
       validateStatus: () => true,

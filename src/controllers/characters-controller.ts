@@ -64,9 +64,7 @@ export class CharactersController {
         return invalidRequest();
       }
 
-      const suppliedProperties = parsedInput.properties.map(
-        (property) => property.name
-      );
+      const suppliedProperties = Object.keys(parsedInput.properties);
 
       const missingCharacterProperties: Array<string> = [];
       for (const requiredProperty of RequiredCharacterProperties) {
@@ -86,7 +84,7 @@ export class CharactersController {
           properties: parsedInput.properties,
         }
       );
-      return formatResponse(200, { ...character });
+      return formatResponse(200, character);
     } catch (error) {
       Log.error(`Could not create character.`);
       return internalServerError();

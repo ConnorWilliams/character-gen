@@ -5,10 +5,10 @@ import { CharacterItem, characterSchema } from "./dynamoose/chat";
 import * as dynamoose from "dynamoose";
 import { DYNAMOOSE_DEFAULT_OPTIONS } from "../utils/dynamoose";
 import { narrowOrThrow } from "../utils/narrow-or-throw";
-import { Character, CharacterProperty, CreateCharacterInput } from "./dto";
+import { Character, CreateCharacterInput } from "./dto";
 import { v4 as uuidv4 } from "uuid";
 import { decode, decodeNotThrow } from "../utils/decode";
-import { array, number, string } from "io-ts";
+import { number, record, string } from "io-ts";
 
 export class CharacterStore {
   private readonly model: Model;
@@ -34,7 +34,7 @@ export class CharacterStore {
           numberOfConversations: decode(original.numberOfConversations, number),
           createdAt: new Date(original.createdAt).toLocaleString(),
           updatedAt: new Date(original.updatedAt).toLocaleString(),
-          properties: decode(original.properties, array(CharacterProperty)),
+          properties: decode(original.properties, record(string, string)),
         };
       },
     });

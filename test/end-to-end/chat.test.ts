@@ -14,6 +14,7 @@ import * as path from "path";
 import { cons } from "fp-ts/lib/ReadonlyNonEmptyArray";
 import { createCognitoUserAndLogin } from "../utils/cognito-login";
 import { createCharacter, createChat } from "./utils";
+import { sleep } from "../utils/sleep";
 
 const API_URL = process.env.API_URL;
 jestOpenAPI(path.resolve(__dirname, "./../../openapi.yaml"));
@@ -45,7 +46,10 @@ describe("Chats API", () => {
 
   describe("Create chat", () => {
     it("returns 200 and a chat", async () => {
+      await sleep(1000);
       const createCharacterResponse = await createCharacter(jwt);
+
+      await sleep(1000);
       const createChatResponse = await axios.post(
         `${API_URL}/chat`,
         {
@@ -82,11 +86,16 @@ describe("Chats API", () => {
 
   describe("Reply to chat", () => {
     it("returns 200 and a response", async () => {
+      await sleep(1000);
       const createCharacterResponse = await createCharacter(jwt);
+
+      await sleep(1000);
       const createChatResponse = await createChat(
         jwt,
         createCharacterResponse.data.characterId
       );
+
+      await sleep(1000);
       console.log(`Chat ID is: ${createChatResponse.data.chatId}`);
       const replyToChatResponse = await axios.post(
         `${API_URL}/chat/${createChatResponse.data.chatId}`,

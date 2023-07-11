@@ -32,9 +32,10 @@ export const chatSchema = new Schema(
         {
           type: Object,
           schema: {
-            name: String,
+            id: String,
+            role: String,
             timestamp: String,
-            text: String,
+            content: String,
           },
         },
       ],
@@ -53,7 +54,7 @@ export class CharacterItem extends Item {
   userId: string;
   name: string;
   description: string;
-  properties: Array<{ name: string; value: string }>;
+  properties: Record<string, string>;
   numberOfConversations: number;
   createdAt: string;
   updatedAt: string;
@@ -77,16 +78,7 @@ export const characterSchema = new Schema(
       default: "",
     },
     properties: {
-      type: Array,
-      schema: [
-        {
-          type: Object,
-          schema: {
-            name: String,
-            value: String,
-          },
-        },
-      ],
+      type: Object,
     },
     numberOfConversations: {
       type: Number,
@@ -94,6 +86,9 @@ export const characterSchema = new Schema(
     },
   },
   {
+    saveUnknown: [
+      "properties.*", // store 1 level deep of nested properties in `properties` property
+    ],
     timestamps: {
       createdAt: "createdAt",
       updatedAt: "updatedAt",

@@ -1,11 +1,13 @@
 import { ChatStore } from "../data/chat-store";
 import { Chat, Message, MessageResponse } from "../data/dto";
 import { CharacterService } from "./character-service";
+import { OpenAiService } from "./openai-service";
 
 export class ChatService {
   constructor(
     private readonly chatStore = new ChatStore(),
-    private readonly characterService = new CharacterService()
+    private readonly characterService = new CharacterService(),
+    private readonly openAiService = new OpenAiService()
   ) {}
 
   public async getChats(userId: string): Promise<Chat[]> {
@@ -22,9 +24,13 @@ export class ChatService {
   public async startChat(userId: string, characterId: string): Promise<Chat> {
     const characterWithUpdatedChatCount =
       await this.characterService.incrementNumberOfChats(userId, characterId);
+    const firstCharacterMessage: string = await this.openAiService.startChat(
+      characterWithUpdatedChatCount
+    );
     const firstMessage: Message = {
-      name: characterWithUpdatedChatCount.name,
-      text: `Hello user ${userId}, my name is ${characterWithUpdatedChatCount.name}. How can I help you today?`, // TODO: Add openai call here
+      id: characterWithUpdatedChatCount.characterId,
+      role: "character",
+      content: firstCharacterMessage,
       timestamp: Date.now().toString(),
     };
     return await this.chatStore.createChat(
@@ -45,14 +51,16 @@ export class ChatService {
   ): Promise<MessageResponse> {
     let chat: Chat;
     const message: Message = {
-      name: userId, //TODO: change to user name
-      text: text,
+      id: userId, //TODO: change to user name
+      role: "user",
+      content: text,
       timestamp: Date.now().toString(),
     };
     chat = await this.chatStore.addMessageToChat(userId, chatId, message);
     const response: Message = {
-      name: chat.character.name,
-      text: "Example response", //TODO: Add openai call here
+      id: chat.character.characterId,
+      role: "character",
+      content: await this.openAiService.getReply(chat),
       timestamp: Date.now().toString(),
     };
     chat = await this.chatStore.addMessageToChat(userId, chatId, response);
